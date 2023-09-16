@@ -4,6 +4,8 @@
 #include <string>
 #include <algorithm>
 
+const int SNAP = 40; 
+
 class GameTile {
     public:
     std::string user;
@@ -11,8 +13,9 @@ class GameTile {
      int offset;
     GameTile(std::string _user,int i,int j){
         user=_user;
+        sf::Color color= user =="user"? sf::Color::Cyan: sf::Color::Black;
         offset=user=="enemy"?640:0;
-        shape->setFillColor(sf::Color::Cyan);
+        shape->setFillColor(color);
         shape->setOutlineThickness(2);
         shape->setPosition(10 + 40 * i + offset, 10+ 40*j);
     }
@@ -20,17 +23,19 @@ class GameTile {
 
 class BattleShip {
     public:
-    int length= 2;
-    int width=40*length-8;
+    sf::Color color=sf::Color::Red;
+    int length;
+    int width;
     int height=32;
     sf::RectangleShape* shape ;
     int offset;
     std::string direction= "vertical";
-    BattleShip(){
-        
+    BattleShip(int _length){
+        length= _length;
+        width=40*length-8;
         shape = new sf::RectangleShape(sf::Vector2f(width, height));
         // offset=user=="enemy"?640:0;
-        shape->setFillColor(sf::Color::Red);
+        shape->setFillColor(color);
         shape->setOutlineThickness(1);
         shape->setPosition(13, 13);
     }
@@ -73,7 +78,9 @@ int main()
     sf::RenderWindow window(sf::VideoMode(1080, 720), "SFML works!");
     GameGrid userGrid= GameGrid("user");
     GameGrid enemyGrid= GameGrid("enemy");
-    BattleShip battleship = BattleShip();
+    BattleShip* userShips[7] = {new BattleShip(5),new BattleShip(4),new BattleShip(3),new BattleShip(2),new BattleShip(2),new BattleShip(1),new BattleShip(1)};
+
+    BattleShip selectedShip = BattleShip(2);
     while (window.isOpen())
     {
         sf::Event event;
@@ -84,7 +91,7 @@ int main()
                 window.close();
             if (event.type == sf::Event::KeyPressed) {
                 if (event.key.code == sf::Keyboard::R) {
-                    battleship.rotate();
+                    selectedShip.rotate();
                 }
              }
         }
@@ -101,7 +108,7 @@ int main()
             window.draw(*tile->shape);
            }
         }
-       window.draw(*battleship.shape);
+       window.draw(*selectedShip.shape);
         window.display();
     }
 
