@@ -23,21 +23,22 @@ class GameTile {
 
 class BattleShip {
     public:
-    sf::Color color=sf::Color::Red;
+    sf::Color color=sf::Color::Green;
     int length;
-    int width;
-    int height=32;
+    int width=32;
+    int height;
     sf::RectangleShape* shape ;
     int offset;
     std::string direction= "vertical";
-    BattleShip(int _length){
+    BattleShip(int _length, int index){
         length= _length;
-        width=40*length-8;
+        height=40*length-8;
+        offset = 40*index ;
         shape = new sf::RectangleShape(sf::Vector2f(width, height));
         // offset=user=="enemy"?640:0;
         shape->setFillColor(color);
         shape->setOutlineThickness(1);
-        shape->setPosition(13, 13);
+        shape->setPosition(13+offset,720- 53-height);
     }
     BattleShip& rotate(){
         if(direction=="vertical"){
@@ -78,24 +79,35 @@ int main()
     sf::RenderWindow window(sf::VideoMode(1080, 720), "SFML works!");
     GameGrid userGrid= GameGrid("user");
     GameGrid enemyGrid= GameGrid("enemy");
-    BattleShip* userShips[7] = {new BattleShip(5),new BattleShip(4),new BattleShip(3),new BattleShip(2),new BattleShip(2),new BattleShip(1),new BattleShip(1)};
+    BattleShip* userShips[7] = {new BattleShip(5,0),new BattleShip(4,1),new BattleShip(3,2),new BattleShip(2,3),new BattleShip(2,4),new BattleShip(1,5),new BattleShip(1,6)};
 
-    BattleShip selectedShip = BattleShip(2);
+    BattleShip* selectedShip = NULL;
     while (window.isOpen())
     {
         sf::Event event;
         sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+        auto mouseCoords = window.mapPixelToCoords(mousePosition);
         while (window.pollEvent(event))
         {   
             if (event.type == sf::Event::Closed)
                 window.close();
-            if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::R) {
-                    selectedShip.rotate();
+            if (event.type == sf::Event::MouseButtonPressed){
+                if (event.mouseButton.button == sf::Mouse::Left)
+                {
+                   for(auto ship:userShips){
+                    if(ship->shape->getGlobalBounds().contains(mouseCoords))
+                        selectedShip=ship;
+                   }
                 }
+            }
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::R && selectedShip) {
+                    selectedShip->rotate();
+                }
+                if(event.key.code == sf::Keyboard::Q)window.close();
              }
         }
-
+        if(selectedShip)selectedShip->shape->setPosition(mouseCoords);
         window.clear();
         //draw
         for(auto row: userGrid.grid){
@@ -108,7 +120,9 @@ int main()
             window.draw(*tile->shape);
            }
         }
-       window.draw(*selectedShip.shape);
+        for(auto ship: userShips){
+            window.draw(*ship->shape);
+           }
         window.display();
     }
 
