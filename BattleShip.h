@@ -7,6 +7,7 @@
 class BattleShip {
     public:
     sf::Color color;
+    sf::Vector2i coords;
     int length;
     int width;
     int height;
@@ -15,5 +16,9 @@ class BattleShip {
     std::string direction= "vertical";
     BattleShip(int _length, int index);
     BattleShip& rotate();
+    BattleShip& setColor(sf::Color);
+    BattleShip& setPos(sf::Vector2f);
+    BattleShip& setCoords(sf::Vector2i);
+    bool fits();
 };
 #endif

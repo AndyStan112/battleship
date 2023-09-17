@@ -11,13 +11,16 @@ class GameTile {
     std::string user;
     sf::RectangleShape* shape = new sf::RectangleShape(sf::Vector2f(40, 40));
      int offset;
+     sf::Vector2f pos;
     GameTile(std::string _user,int i,int j){
         user=_user;
         sf::Color color= user =="user"? sf::Color::Cyan: sf::Color::Black;
         offset=user=="enemy"?640:0;
+        pos.x=10 + 40 * i + offset;
+        pos.y= 10+ 40*j;
         shape->setFillColor(color);
         shape->setOutlineThickness(2);
-        shape->setPosition(10 + 40 * i + offset, 10+ 40*j);
+        shape->setPosition(pos.x,pos.y );
     }
 };
 
@@ -37,6 +40,20 @@ class GameGrid {
         }
         std::cout<<"test";
     }
+    sf::Vector2f getClosestPos(sf::Vector2f coords,BattleShip* ship ){
+        sf::Vector2i closestCoords= getClosestCoords(coords,ship);
+        return grid[closestCoords.x][closestCoords.y]->pos;
+    }
+    sf::Vector2i getClosestCoords(sf::Vector2f coords,BattleShip* ship ){
+        coords.x -=10;
+        coords.y -=10;
+        int i =int(coords.x)/40;
+        int j =int(coords.y)/40;
+         i = std::max(0, std::min(9, i));
+         j = std::max(0, std::min(9, j));
+        
+        return sf::Vector2i(i,j);
+    }
 };
 
 int main()
@@ -52,7 +69,7 @@ int main()
     {
         sf::Event event;
         sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-        auto mouseCoords = window.mapPixelToCoords(mousePosition);
+        sf::Vector2f mouseCoords = window.mapPixelToCoords(mousePosition);
         while (window.pollEvent(event))
         {   
             if (event.type == sf::Event::Closed)
@@ -73,7 +90,22 @@ int main()
                 if(event.key.code == sf::Keyboard::Q)window.close();
              }
         }
-        if(selectedShip){if(true)selectedShip->shape->setPosition(mouseCoords);}
+        if(selectedShip){
+           
+            if(mouseCoords.x>=10+400||mouseCoords.y>=10+400){
+                 selectedShip->setPos(mouseCoords);
+                selectedShip->setColor(sf::Color::Red);
+                }
+            else{
+                 auto shipPos = userGrid.getClosestPos(mouseCoords,selectedShip);
+                 auto shipCoords = userGrid.getClosestCoords(mouseCoords,selectedShip);
+                 //std::cout<<closestPos.x<< " "<<closestPos.y;
+                 selectedShip->setPos(shipPos);
+                 selectedShip->setCoords(shipCoords);
+                 if(selectedShip->fits())selectedShip->setColor(sf::Color::Green);
+                 else selectedShip->setColor(sf::Color::Red);
+                 }
+            }
         window.clear();
         //draw
         for(auto row: userGrid.grid){

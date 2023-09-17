@@ -2,6 +2,7 @@
 
     BattleShip::BattleShip(int _length, int index){
         color=sf::Color::Green;
+        coords=sf::Vector2i(0,0);
         length= _length;
         height=40*length-8;
         width=32;
@@ -26,3 +27,16 @@
         }
           return *this;
     };
+    BattleShip  &BattleShip::setColor(sf::Color _color){
+        color = _color;
+        shape->setFillColor(color);
+    };
+    BattleShip  &BattleShip::setPos(sf::Vector2f pos){
+       shape->setPosition(3+pos.x,3+pos.y);
+    };
+    BattleShip  &BattleShip::setCoords(sf::Vector2i _coords){
+       coords= _coords;
+    };
+    bool BattleShip::fits(){
+       return  direction=="horizontal" &&  coords.x+length-1<10||direction=="vertical" &&  coords.y+length-1<10;
+    }
