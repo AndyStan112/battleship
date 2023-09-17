@@ -54,6 +54,9 @@ class GameGrid {
         
         return sf::Vector2i(i,j);
     }
+    bool isOutside(sf::Vector2f pos){
+        return pos.x>=10+400||pos.y>=10+400;
+    }
 };
 
 int main()
@@ -77,10 +80,30 @@ int main()
             if (event.type == sf::Event::MouseButtonPressed){
                 if (event.mouseButton.button == sf::Mouse::Left)
                 {
-                   for(auto ship:userShips){
-                    if(ship->shape->getGlobalBounds().contains(mouseCoords))
-                        selectedShip=ship;
+                   if(selectedShip){
+                     window.setMouseCursorVisible(true);
+                    if(userGrid.isOutside(mouseCoords))
+                     {
+                       
+                        selectedShip->reset();
+                       
+                        }
+                        else{
+                            selectedShip->fixed=true;
+                            
+                        }
+                     selectedShip=NULL;
                    }
+                   for(auto ship:userShips){
+                    
+                    if(ship->shape->getGlobalBounds().contains(mouseCoords)&&!ship->fixed)
+                        {
+                            window.setMouseCursorVisible(false);
+                            selectedShip=ship;
+                            break;
+                            }
+                   }
+                   
                 }
             }
             if (event.type == sf::Event::KeyPressed) {
@@ -92,16 +115,15 @@ int main()
         }
         if(selectedShip){
            
-            if(mouseCoords.x>=10+400||mouseCoords.y>=10+400){
-                 selectedShip->setPos(mouseCoords);
-                selectedShip->setColor(sf::Color::Red);
+            if(userGrid.isOutside(mouseCoords)){
+                 selectedShip->setPos(mouseCoords).setColor(sf::Color::Red);
+                
                 }
             else{
                  auto shipPos = userGrid.getClosestPos(mouseCoords,selectedShip);
                  auto shipCoords = userGrid.getClosestCoords(mouseCoords,selectedShip);
                  //std::cout<<closestPos.x<< " "<<closestPos.y;
-                 selectedShip->setPos(shipPos);
-                 selectedShip->setCoords(shipCoords);
+                 selectedShip->setPos(shipPos).setCoords(shipCoords);
                  if(selectedShip->fits())selectedShip->setColor(sf::Color::Green);
                  else selectedShip->setColor(sf::Color::Red);
                  }
