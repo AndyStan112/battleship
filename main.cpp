@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
-
+#include "BattleShip.cpp"
 const int SNAP = 40; 
 
 class GameTile {
@@ -21,40 +21,6 @@ class GameTile {
     }
 };
 
-class BattleShip {
-    public:
-    sf::Color color=sf::Color::Green;
-    int length;
-    int width=32;
-    int height;
-    sf::RectangleShape* shape ;
-    int offset;
-    std::string direction= "vertical";
-    BattleShip(int _length, int index){
-        length= _length;
-        height=40*length-8;
-        offset = 40*index ;
-        shape = new sf::RectangleShape(sf::Vector2f(width, height));
-        // offset=user=="enemy"?640:0;
-        shape->setFillColor(color);
-        shape->setOutlineThickness(1);
-        shape->setPosition(13+offset,720- 53-height);
-    }
-    BattleShip& rotate(){
-        if(direction=="vertical"){
-            direction="horizontal";
-            std::swap(width,height);
-            shape->setSize(sf::Vector2f(width,height));
-        }
-        else{
-            direction="vertical";
-            std::swap(width,height);
-            shape->setSize(sf::Vector2f(width,height));
-        }
-          return *this;
-    }
-  
-};
 
 class GameGrid {
     public:
@@ -107,7 +73,7 @@ int main()
                 if(event.key.code == sf::Keyboard::Q)window.close();
              }
         }
-        if(selectedShip)selectedShip->shape->setPosition(mouseCoords);
+        if(selectedShip){if(true)selectedShip->shape->setPosition(mouseCoords);}
         window.clear();
         //draw
         for(auto row: userGrid.grid){
