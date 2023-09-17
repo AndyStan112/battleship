@@ -23,6 +23,6 @@ class BattleShip {
     BattleShip& setPos(sf::Vector2f);
     BattleShip& setCoords(sf::Vector2i);
     
-    bool fits();
+    bool canDrop();
 };
 #endif

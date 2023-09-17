@@ -56,6 +56,6 @@
        coords= _coords;
         return *this;
     };
-    bool BattleShip::fits(){
-       return  direction=="horizontal" &&  coords.x+length-1<10||direction=="vertical" &&  coords.y+length-1<10;
+    bool BattleShip::canDrop(){
+       return (direction == "horizontal" && coords.x + length - 1 < 10) || (direction == "vertical" && coords.y + length - 1 < 10);
     }

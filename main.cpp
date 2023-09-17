@@ -65,7 +65,7 @@ int main()
     sf::RenderWindow window(sf::VideoMode(1080, 720), "SFML works!");
     GameGrid userGrid= GameGrid("user");
     GameGrid enemyGrid= GameGrid("enemy");
-    BattleShip* userShips[7] = {new BattleShip(5,0),new BattleShip(4,1),new BattleShip(3,2),new BattleShip(2,3),new BattleShip(2,4),new BattleShip(1,5),new BattleShip(1,6)};
+    std::array<BattleShip*, 7> userShips = {new BattleShip(5,0),new BattleShip(4,1),new BattleShip(3,2),new BattleShip(2,3),new BattleShip(2,4),new BattleShip(1,5),new BattleShip(1,6)};
 
     BattleShip* selectedShip = NULL;
     while (window.isOpen())
@@ -73,61 +73,77 @@ int main()
         sf::Event event;
         sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
         sf::Vector2f mouseCoords = window.mapPixelToCoords(mousePosition);
-        while (window.pollEvent(event))
-        {   
-            if (event.type == sf::Event::Closed)
-                window.close();
-            if (event.type == sf::Event::MouseButtonPressed){
-                if (event.mouseButton.button == sf::Mouse::Left)
-                {
-                   if(selectedShip){
-                     window.setMouseCursorVisible(true);
-                    if(userGrid.isOutside(mouseCoords))
-                     {
-                       
-                        selectedShip->reset();
-                       
-                        }
-                        else{
+
+        // handle all input events from user
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) window.close();
+
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) { 
+                    // if the user is allowed drop a ship
+                    if(selectedShip && selectedShip->canDrop()) {
+                        // make the cursor visible (exit "drag&drop" feel)
+                        window.setMouseCursorVisible(true);
+                                            
+                        // if the ship is outside the board
+                        if(userGrid.isOutside(mouseCoords))
+                            // place the ship back in the "selection list"
+                            selectedShip->reset();
+                        else 
+                            // otherwise place the ship on the board
                             selectedShip->fixed=true;
-                            
-                        }
-                     selectedShip=NULL;
-                   }
-                   for(auto ship:userShips){
+                        
+                        selectedShip=NULL;
+                    }
                     
-                    if(ship->shape->getGlobalBounds().contains(mouseCoords)&&!ship->fixed)
-                        {
-                            window.setMouseCursorVisible(false);
-                            selectedShip=ship;
-                            break;
+                    // if the user clicked inside the window and doesn't hold a ship
+                    else 
+                        for(auto ship : userShips)
+                            // check if he is trying to grab a ship from the "selection list"
+                            if(ship->shape->getGlobalBounds().contains(mouseCoords))
+                            {
+                                // make the cursor invisible (create a "drag&drop" feel)
+                                window.setMouseCursorVisible(false);
+                                
+                                selectedShip=ship;
+                                break;
                             }
-                   }
-                   
-                }
             }
+
             if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::R && selectedShip) {
+                if (event.key.code == sf::Keyboard::R && selectedShip)
                     selectedShip->rotate();
-                }
-                if(event.key.code == sf::Keyboard::Q)window.close();
-             }
+                if(event.key.code == sf::Keyboard::Q) 
+                    window.close();
+            }
         }
+
+
         if(selectedShip){
            
-            if(userGrid.isOutside(mouseCoords)){
-                 selectedShip->setPos(mouseCoords).setColor(sf::Color::Red);
-                
-                }
-            else{
-                 auto shipPos = userGrid.getClosestPos(mouseCoords,selectedShip);
-                 auto shipCoords = userGrid.getClosestCoords(mouseCoords,selectedShip);
-                 //std::cout<<closestPos.x<< " "<<closestPos.y;
-                 selectedShip->setPos(shipPos).setCoords(shipCoords);
-                 if(selectedShip->fits())selectedShip->setColor(sf::Color::Green);
-                 else selectedShip->setColor(sf::Color::Red);
-                 }
+            // if the user holds a ship, but is outside the board
+            if(userGrid.isOutside(mouseCoords)) {
+                // make the ship follow the cursor (disable the snapping feel) and change the color to red 
+                 selectedShip->setPos(mouseCoords).setCoords(sf::Vector2i(0, 0)).setColor(sf::Color::Red);
             }
+
+            // if the user holds a ship and is inside the board
+            else {
+
+                // the position of the closest grid cell (e.g: {x: 50px y: 90px})
+                auto shipPos = userGrid.getClosestPos(mouseCoords,selectedShip);
+                 
+                // the index of the closest grid cell (e.g. {i: 1, j: 2});
+                auto shipCoords = userGrid.getClosestCoords(mouseCoords,selectedShip);
+                
+                // snap the ship to the closest grid cell 
+                selectedShip->setPos(shipPos).setCoords(shipCoords);
+
+                if(selectedShip->canDrop())
+                    selectedShip->setColor(sf::Color::Green);
+                else 
+                    selectedShip->setColor(sf::Color::Red);
+            }
+        }
         window.clear();
         //draw
         for(auto row: userGrid.grid){
