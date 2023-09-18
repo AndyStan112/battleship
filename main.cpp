@@ -54,9 +54,10 @@ int main()
                             // place the ship back in the "selection list"
                             selectedShip->reset();
                         else
-                            // otherwise place the ship on the board
-                            // selectedShip->fixed = true;
+                        {
                             selectedShip->setColor(PLACED);
+                            userGrid.setPipCells(selectedShip);
+                        }
 
                         selectedShip = NULL;
                     }
@@ -117,6 +118,8 @@ int main()
             for (auto tile : row)
             {
                 window.draw(*tile->shape);
+                if (tile->showPip)
+                    window.draw(*tile->pip);
             }
         }
         for (auto row : enemyGrid.grid)
@@ -133,7 +136,7 @@ int main()
         }
 
         // the last selected ships should be rendered above
-        if(selectedShip)
+        if (selectedShip)
             window.draw(*selectedShip->shape);
 
         window.display();

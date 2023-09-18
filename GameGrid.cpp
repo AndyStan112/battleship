@@ -47,3 +47,17 @@ bool GameGrid::isOutside(sf::Vector2f pos)
 {
     return pos.x >= GRID_CELL_SIZE * TABLE_ROWS || pos.y >= GRID_CELL_SIZE * TABLE_COLUMNS;
 }
+
+GameGrid &GameGrid::setPipCells(BattleShip *ship)
+{
+    int i = ship->coords.x;
+    int j = ship->coords.y;
+    if (ship->direction == "horizontal")
+        for (int k = 0; k < ship->length; k++)
+            grid[i + k][j]->setShowPip(true);
+    else
+        for (int k = 0; k < ship->length; k++)
+            grid[i][j + k]->setShowPip(true);
+
+    return *this;
+}
