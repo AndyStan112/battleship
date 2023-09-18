@@ -1,7 +1,7 @@
 #include "BattleShip.h"
 #include "constants.h"
 #include "display.h"
-
+#include "GameGrid.h"
 
 BattleShip& BattleShip::setDefaultState () {
     color = sf::Color::Green;
@@ -58,6 +58,13 @@ BattleShip& BattleShip::setCoords(sf::Vector2i _coords) {
     coords = _coords;
     return *this;
 };
-bool BattleShip::canDrop() {
-    return (direction == "horizontal" && coords.x + length - 1 < TABLE_ROWS) || (direction == "vertical" && coords.y + length - 1 < TABLE_COLUMNS);
+bool BattleShip::canDrop(std::array<BattleShip*, 7> ships) {
+    if(!((direction == "horizontal" && coords.x + length - 1 < TABLE_ROWS) || (direction == "vertical" && coords.y + length - 1 < TABLE_COLUMNS))) 
+        return false;
+
+    for(auto ship : ships) {
+        if(ship != this && ship->shape->getGlobalBounds().intersects(shape->getGlobalBounds())) return false;
+    }
+
+    return true;
 }

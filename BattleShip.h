@@ -1,9 +1,9 @@
+#pragma once
 #include <string>
 #include <SFML/Graphics.hpp>
 #include "display.h"
 
-#ifndef BATTLESHIP_H
-#define BATTLESHIP_H
+class GameGrid;
 
 class BattleShip {
     public:
@@ -25,6 +25,5 @@ class BattleShip {
     BattleShip& setPos(sf::Vector2f);
     BattleShip& setCoords(sf::Vector2i);
     BattleShip& setDefaultState();
-    bool canDrop();
+    bool canDrop(std::array<BattleShip*, 7> ships);
 };
-#endif
