@@ -129,6 +129,11 @@ int main()
         {
             window.draw(*ship->shape);
         }
+
+        // the last selected ships should be rendered above
+        if(selectedShip)
+            window.draw(*selectedShip->shape);
+
         window.display();
     }
 
