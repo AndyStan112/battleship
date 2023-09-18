@@ -55,7 +55,8 @@ int main()
                             selectedShip->reset();
                         else
                             // otherwise place the ship on the board
-                            selectedShip->fixed = true;
+                            // selectedShip->fixed = true;
+                            selectedShip->setColor(PLACED);
 
                         selectedShip = NULL;
                     }
@@ -109,7 +110,7 @@ int main()
             }
         }
 
-        window.clear();
+        window.clear(sf::Color::White);
         // draw
         for (auto row : userGrid.grid)
         {
@@ -127,6 +128,7 @@ int main()
         }
         for (auto ship : userShips)
         {
+            window.draw(*ship->phantom);
             window.draw(*ship->shape);
         }
         window.display();

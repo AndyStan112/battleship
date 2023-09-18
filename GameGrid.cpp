@@ -4,29 +4,36 @@
 #include "GameGrid.h"
 #include "GameTile.cpp"
 
-GameGrid::GameGrid(std::string _user, Display* display) {
-        user = _user;
+GameGrid::GameGrid(std::string _user, Display *display)
+{
+    user = _user;
 
-        for (int i = 0; i < TABLE_ROWS; i++) {
-            for (int j = 0; j < TABLE_COLUMNS; j++) {
-                if(user == "user") grid[i][j] = new GameTile(i, j, 0, sf::Color::Cyan, sf::Vector2i(GLOBAL_MARGIN, GLOBAL_MARGIN));
-                if(user == "enemy") grid[i][j] = new GameTile(i, j, display->width - GRID_CELL_SIZE * TABLE_COLUMNS, sf::Color::Black, sf::Vector2i(-GLOBAL_MARGIN, GLOBAL_MARGIN));
-            }
+    for (int i = 0; i < TABLE_ROWS; i++)
+    {
+        for (int j = 0; j < TABLE_COLUMNS; j++)
+        {
+            if (user == "user")
+                grid[i][j] = new GameTile(i, j, 0, WATER, sf::Vector2i(GLOBAL_MARGIN, GLOBAL_MARGIN));
+            if (user == "enemy")
+                grid[i][j] = new GameTile(i, j, display->width - GRID_CELL_SIZE * TABLE_COLUMNS, FOG, sf::Vector2i(-GLOBAL_MARGIN, GLOBAL_MARGIN));
         }
     }
+}
 
 /**
  * @return `sf::Vector2f`- the distance (in pixels) of the closest grid cell to the ship, measured from the origin.
-*/
-sf::Vector2f GameGrid::getClosestGridCellPosition(sf::Vector2f coords, BattleShip* ship) {
+ */
+sf::Vector2f GameGrid::getClosestGridCellPosition(sf::Vector2f coords, BattleShip *ship)
+{
     sf::Vector2i closestCoords = getClosestGridCellCoordinates(coords, ship);
     return grid[closestCoords.x][closestCoords.y]->pos;
 }
 
 /**
  * @return `sf::Vector2i`- a pair of integers between [0, TABLE_ROWS) representing the row and column of the closest grid cell from the ship
-*/
-sf::Vector2i GameGrid::getClosestGridCellCoordinates(sf::Vector2f coords, BattleShip* ship) {
+ */
+sf::Vector2i GameGrid::getClosestGridCellCoordinates(sf::Vector2f coords, BattleShip *ship)
+{
     int i = int(coords.x) / GRID_CELL_SIZE;
     int j = int(coords.y) / GRID_CELL_SIZE;
 
@@ -36,6 +43,7 @@ sf::Vector2i GameGrid::getClosestGridCellCoordinates(sf::Vector2f coords, Battle
     return sf::Vector2i(i, j);
 }
 
-bool GameGrid::isOutside(sf::Vector2f pos) {
+bool GameGrid::isOutside(sf::Vector2f pos)
+{
     return pos.x >= GRID_CELL_SIZE * TABLE_ROWS || pos.y >= GRID_CELL_SIZE * TABLE_COLUMNS;
 }
