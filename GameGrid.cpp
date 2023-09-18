@@ -9,8 +9,8 @@ GameGrid::GameGrid(std::string _user, Display* display) {
 
         for (int i = 0; i < TABLE_ROWS; i++) {
             for (int j = 0; j < TABLE_COLUMNS; j++) {
-                if(user == "user") grid[i][j] = new GameTile(i, j, 0, sf::Color::Cyan);
-                if(user == "enemy") grid[i][j] = new GameTile(i, j, display->width - GRID_CELL_SIZE * TABLE_COLUMNS, sf::Color::Black);
+                if(user == "user") grid[i][j] = new GameTile(i, j, 0, sf::Color::Cyan, sf::Vector2i(GLOBAL_MARGIN, GLOBAL_MARGIN));
+                if(user == "enemy") grid[i][j] = new GameTile(i, j, display->width - GRID_CELL_SIZE * TABLE_COLUMNS, sf::Color::Black, sf::Vector2i(-GLOBAL_MARGIN, GLOBAL_MARGIN));
             }
         }
     }
