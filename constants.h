@@ -1,7 +1,7 @@
 #pragma once
 
 const int GRID_CELL_SIZE = 40;
-const int GRID_CELL_THICKNESS = 2;
+const int GRID_CELL_THICKNESS = 4;
 const int TABLE_COLUMNS = 10;
 const int TABLE_ROWS = 10;
 const int DEFAULT_DISPLAY_WIDTH = 1080;

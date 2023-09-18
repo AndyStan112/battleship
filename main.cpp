@@ -10,6 +10,27 @@
 
 int main()
 {
+    sf::Font font;
+    if (!font.loadFromFile("fonts/FuturaBold.ttf"))
+        throw "Font missing! Please download Futura Bold Font!";
+
+    sf::Text text;
+
+    text.setPosition(100, 100);
+
+    text.setRotation(-90);
+
+    text.setFont(font); // font is a sf::Font
+
+    // set the string to display
+    text.setString("Hello world");
+
+    // set the character size
+    text.setCharacterSize(24); // in pixels, not points!
+
+    // set the color
+    text.setFillColor(sf::Color::White);
+    
     Display *display = new Display(DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT);
 
     sf::RenderWindow window(sf::VideoMode(display->width, display->height), "SFML works!");
@@ -109,7 +130,7 @@ int main()
             }
         }
 
-        window.clear();
+        window.clear(sf::Color::Black);
         // draw
         for (auto row : userGrid.grid)
         {
@@ -133,6 +154,8 @@ int main()
         // the last selected ships should be rendered above
         if(selectedShip)
             window.draw(*selectedShip->shape);
+
+        window.draw(text);
 
         window.display();
     }
