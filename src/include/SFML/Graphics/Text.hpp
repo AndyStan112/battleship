@@ -502,7 +502,7 @@ private:
 /// sf::Text text("hello", font);
 /// text.setCharacterSize(30);
 /// text.setStyle(sf::Text::Bold);
-/// text.setFillColor(sf::Color::Red);
+/// text.setFillColor(BATTLESHIP_IMPLACABLE);
 ///
 /// // Draw it
 /// window.draw(text);

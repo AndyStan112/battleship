@@ -260,8 +260,8 @@ SFML_GRAPHICS_API Color& operator *=(Color& left, const Color& right);
 /// \code
 /// sf::Color black       = sf::Color::Black;
 /// sf::Color white       = sf::Color::White;
-/// sf::Color red         = sf::Color::Red;
-/// sf::Color green       = sf::Color::Green;
+/// sf::Color red         = BATTLESHIP_IMPLACABLE;
+/// sf::Color green       = BATTLESHIP_PLACABLE;
 /// sf::Color blue        = sf::Color::Blue;
 /// sf::Color yellow      = sf::Color::Yellow;
 /// sf::Color magenta     = sf::Color::Magenta;

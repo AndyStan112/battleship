@@ -75,8 +75,10 @@ int main()
                             // place the ship back in the "selection list"
                             selectedShip->reset();
                         else
-                            // otherwise place the ship on the board
-                            selectedShip->fixed = true;
+                        {
+                            selectedShip->setColor(BATTLESHIP_PLACED);
+                            userGrid.setPipCells(selectedShip);
+                        }
 
                         selectedShip = NULL;
                     }
@@ -111,7 +113,7 @@ int main()
             if (userGrid.isOutside(mouseCoords))
             {
                 // make the ship follow the cursor (disable the snapping feel) and change the color to red
-                selectedShip->setPos(mouseCoords).setCoords(sf::Vector2i(0, 0)).setColor(sf::Color::Red);
+                selectedShip->setPos(mouseCoords).setCoords(sf::Vector2i(0, 0)).setColor(BATTLESHIP_IMPLACABLE);
             }
 
             // if the user holds a ship and is inside the board
@@ -124,19 +126,21 @@ int main()
                 selectedShip->setPos(snappedShipPosition).setCoords(snappedShipCoordinates);
 
                 if (selectedShip->canDrop(userShips))
-                    selectedShip->setColor(sf::Color::Green);
+                    selectedShip->setColor(BATTLESHIP_PLACABLE);
                 else
-                    selectedShip->setColor(sf::Color::Red);
+                    selectedShip->setColor(BATTLESHIP_IMPLACABLE);
             }
         }
 
-        window.clear(sf::Color::Black);
+        window.clear(sf::Color::White);
         // draw
         for (auto row : userGrid.grid)
         {
             for (auto tile : row)
             {
                 window.draw(*tile->shape);
+                if (tile->showPip)
+                    window.draw(*tile->pip);
             }
         }
         for (auto row : enemyGrid.grid)
@@ -148,11 +152,12 @@ int main()
         }
         for (auto ship : userShips)
         {
+            window.draw(*ship->phantom);
             window.draw(*ship->shape);
         }
 
         // the last selected ships should be rendered above
-        if(selectedShip)
+        if (selectedShip)
             window.draw(*selectedShip->shape);
 
         window.draw(text);

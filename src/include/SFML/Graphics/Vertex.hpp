@@ -129,10 +129,10 @@ public:
 /// // define a 100x100 square, red, with a 10x10 texture mapped on it
 /// sf::Vertex vertices[] =
 /// {
-///     sf::Vertex(sf::Vector2f(  0,   0), sf::Color::Red, sf::Vector2f( 0,  0)),
-///     sf::Vertex(sf::Vector2f(  0, 100), sf::Color::Red, sf::Vector2f( 0, 10)),
-///     sf::Vertex(sf::Vector2f(100, 100), sf::Color::Red, sf::Vector2f(10, 10)),
-///     sf::Vertex(sf::Vector2f(100,   0), sf::Color::Red, sf::Vector2f(10,  0))
+///     sf::Vertex(sf::Vector2f(  0,   0), BATTLESHIP_IMPLACABLE, sf::Vector2f( 0,  0)),
+///     sf::Vertex(sf::Vector2f(  0, 100), BATTLESHIP_IMPLACABLE, sf::Vector2f( 0, 10)),
+///     sf::Vertex(sf::Vector2f(100, 100), BATTLESHIP_IMPLACABLE, sf::Vector2f(10, 10)),
+///     sf::Vertex(sf::Vector2f(100,   0), BATTLESHIP_IMPLACABLE, sf::Vector2f(10,  0))
 /// };
 ///
 /// // draw it

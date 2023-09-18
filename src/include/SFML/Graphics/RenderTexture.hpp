@@ -282,7 +282,7 @@ private:
 ///    // ...
 ///
 ///    // Clear the whole texture with red color
-///    texture.clear(sf::Color::Red);
+///    texture.clear(BATTLESHIP_IMPLACABLE);
 ///
 ///    // Draw stuff to the texture
 ///    texture.draw(sprite);  // sprite is a sf::Sprite
