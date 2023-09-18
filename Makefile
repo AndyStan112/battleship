@@ -1,10 +1,22 @@
-all:compile link open
+all:compile_client link_client open_client compile_server link_server open_server
 
-compile:
-	g++ -Isrc/include -c main.cpp -DSFML_STATIC
+compile_client:
+	g++ -Isrc/include -c client.cpp -o client.o -DSFML_STATIC
 
-link:
-	g++ main.o -o main -Lsrc/lib -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lopengl32 -lwinmm -lgdi32 -lfreetype
+link_client:
+	g++ client.o -o client -Lsrc/lib -lsfml-network-s -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lws2_32  -lopengl32 -lwinmm -lgdi32 -lfreetype
 
-open:
-	./main.exe
+open_client:
+	./client.exe 
+
+compile_server:
+	g++ -Isrc/include -c server.cpp -o server.o -DSFML_STATIC
+
+link_server:
+	g++ server.o -o server -Lsrc/lib -lsfml-network-s -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lws2_32  -lopengl32 -lwinmm -lgdi32 -lfreetype 
+
+open_server:
+	./server.exe 
+
+clean:
+	rm -f client.o server.o client.exe server.exe
