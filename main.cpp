@@ -3,71 +3,10 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
-#include "battleship.cpp"
 #include "constants.h"
+#include "GameGrid.cpp"
+#include "BattleShip.cpp"
 #include "display.cpp"
-
-class GameTile {
-public:
-    sf::RectangleShape* shape = new sf::RectangleShape(sf::Vector2f(GRID_CELL_SIZE, GRID_CELL_SIZE));
-    sf::Vector2f pos;
-    sf::Vector2i margin;
-    GameTile(int i, int j, int offset, sf::Color color, sf::Vector2i _margin) {
-        margin = _margin;
-        pos.x = GRID_CELL_SIZE * i + offset +margin.x;
-        pos.y = GRID_CELL_SIZE * j + margin.y;
-        shape->setFillColor(color);
-        shape->setOutlineThickness(GRID_CELL_THICKNESS);
-        shape->setPosition(pos.x, pos.y);
-    }
-};
-
-
-class GameGrid {
-public:
-    std::array<std::array<GameTile*, 10>, 10> grid;
-    std::string user;
-
-    GameGrid(std::string _user, Display* display) {
-        user = _user;
-
-        for (int i = 0; i < TABLE_ROWS; i++) {
-            for (int j = 0; j < TABLE_COLUMNS; j++) {
-                if(user == "user") grid[i][j] = new GameTile(i, j, 0, sf::Color::Cyan,sf::Vector2i(GLOBAL_MARGIN,GLOBAL_MARGIN));
-                if(user == "enemy") grid[i][j] = new GameTile(i, j, display->width - GRID_CELL_SIZE * TABLE_COLUMNS, sf::Color::Black,sf::Vector2i(-GLOBAL_MARGIN,GLOBAL_MARGIN));
-            }
-        }
-    }
-
-    /**
-     * @return `sf::Vector2f`- the distance (in pixels) of the closest grid cell to the ship, measured from the origin.
-    */
-    sf::Vector2f getClosestGridCellPosition(sf::Vector2f coords, BattleShip* ship) {
-        sf::Vector2i closestCoords = getClosestGridCellCoordinates(coords, ship);
-        return grid[closestCoords.x][closestCoords.y]->pos;
-    }
-
-    /**
-     * @return `sf::Vector2i`- a pair of integers between [0, TABLE_ROWS) representing the row and column of the closest grid cell from the ship
-    */
-    sf::Vector2i getClosestGridCellCoordinates(sf::Vector2f coords, BattleShip* ship) {
-        int x = coords.x-GLOBAL_MARGIN;
-        int y = coords.y-GLOBAL_MARGIN;
-        int i = int(x) / GRID_CELL_SIZE;
-        int j = int(y) / GRID_CELL_SIZE;
-
-        i = std::max(0, std::min(TABLE_ROWS - 1, i));
-        j = std::max(0, std::min(TABLE_ROWS - 1, j));
-
-        return sf::Vector2i(i, j);
-    }
-
-    bool isOutside(sf::Vector2f pos) {
-        return pos.x >= GRID_CELL_SIZE * TABLE_ROWS || pos.y >= GRID_CELL_SIZE * TABLE_COLUMNS;
-    }
-};
-
-
 
 int main()
 {
@@ -100,7 +39,7 @@ int main()
 
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
                 // if the user is allowed drop a ship
-                if (selectedShip && selectedShip->canDrop()) {
+                if (selectedShip && selectedShip->canDrop(userShips)) {
                     // make the cursor visible (exit "drag&drop" feel)
                     window.setMouseCursorVisible(true);
 
@@ -154,7 +93,7 @@ int main()
                 // snap the ship to the closest grid cell 
                 selectedShip->setPos(snappedShipPosition).setCoords(snappedShipCoordinates);
 
-                if (selectedShip->canDrop())
+                if (selectedShip->canDrop(userShips))
                     selectedShip->setColor(sf::Color::Green);
                 else
                     selectedShip->setColor(sf::Color::Red);

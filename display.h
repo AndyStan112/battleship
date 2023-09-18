@@ -1,6 +1,4 @@
-#ifndef DISPLAY_H
-#define DISPLAY_H
-
+#pragma once
 class Display {
     public: 
         int width; 
@@ -8,5 +6,3 @@ class Display {
 
         Display(int _width, int _height);
 };
-
-#endif
