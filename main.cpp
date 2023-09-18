@@ -30,7 +30,7 @@ int main()
 
     // set the color
     text.setFillColor(sf::Color::White);
-    
+
     Display *display = new Display(DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT);
 
     sf::RenderWindow window(sf::VideoMode(display->width, display->height), "SFML works!");
@@ -77,7 +77,7 @@ int main()
                         else
                         {
                             selectedShip->setColor(BATTLESHIP_PLACED);
-                            userGrid.setPipCells(selectedShip);
+                            userGrid.setPipCells(selectedShip, true);
                         }
 
                         selectedShip = NULL;
@@ -93,6 +93,7 @@ int main()
                             window.setMouseCursorVisible(false);
 
                             selectedShip = ship;
+                            userGrid.setPipCells(selectedShip, false);
                             break;
                         }
             }

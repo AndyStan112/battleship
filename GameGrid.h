@@ -23,6 +23,6 @@ public:
      */
     sf::Vector2i getClosestGridCellCoordinates(sf::Vector2f coords, BattleShip *ship);
 
-    GameGrid &setPipCells(BattleShip *ship);
+    GameGrid &setPipCells(BattleShip *ship, bool show);
     bool isOutside(sf::Vector2f pos);
 };
