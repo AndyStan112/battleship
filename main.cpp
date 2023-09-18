@@ -77,6 +77,9 @@ int main()
                         else
                         {
                             selectedShip->setColor(BATTLESHIP_PLACED);
+                            auto test = userGrid.getClosestGridCellCoordinates(mouseCoords, selectedShip);
+                            std::cout << "i: " << test.x << "j:" << test.y << std::endl;
+                            std::cout << "x: " << mouseCoords.x << "y:" << mouseCoords.y << std::endl;
                             userGrid.setPipCells(selectedShip, true);
                         }
 

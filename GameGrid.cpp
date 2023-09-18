@@ -34,8 +34,9 @@ sf::Vector2f GameGrid::getClosestGridCellPosition(sf::Vector2f coords, BattleShi
  */
 sf::Vector2i GameGrid::getClosestGridCellCoordinates(sf::Vector2f coords, BattleShip *ship)
 {
-    int i = int(coords.x) / GRID_CELL_SIZE;
-    int j = int(coords.y) / GRID_CELL_SIZE;
+    // - GLOBAL_MARGIN - 80
+    int i = int(coords.x) / (GRID_CELL_SIZE + GRID_CELL_THICKNESS);
+    int j = int(coords.y) / (GRID_CELL_SIZE + GRID_CELL_THICKNESS);
 
     i = std::max(0, std::min(TABLE_ROWS - 1, i));
     j = std::max(0, std::min(TABLE_ROWS - 1, j));
@@ -45,7 +46,7 @@ sf::Vector2i GameGrid::getClosestGridCellCoordinates(sf::Vector2f coords, Battle
 
 bool GameGrid::isOutside(sf::Vector2f pos)
 {
-    return pos.x >= GRID_CELL_SIZE * TABLE_ROWS || pos.y >= GRID_CELL_SIZE * TABLE_COLUMNS;
+    return pos.x >= (GRID_CELL_SIZE + GRID_CELL_THICKNESS) * TABLE_ROWS || pos.y >= (GRID_CELL_SIZE + GRID_CELL_THICKNESS) * TABLE_COLUMNS;
 }
 
 GameGrid &GameGrid::setPipCells(BattleShip *ship, bool show)
