@@ -7,8 +7,8 @@ BattleShip& BattleShip::setDefaultState () {
     color = sf::Color::Green;
     coords = sf::Vector2i(0, 0);
     fixed = false;
-    height = GRID_CELL_SIZE * length - 2 * GRID_CELL_THICKNESS;
-    width = GRID_CELL_SIZE - 2 * GRID_CELL_THICKNESS;
+    height = GRID_CELL_SIZE * length - 4 * GRID_CELL_THICKNESS;
+    width = GRID_CELL_SIZE - 4 * GRID_CELL_THICKNESS;
     offset = GRID_CELL_SIZE * index;
 
     shape = new sf::RectangleShape(sf::Vector2f(width, height));
@@ -16,7 +16,7 @@ BattleShip& BattleShip::setDefaultState () {
     shape->setOutlineThickness(1);
 
     // we subtract the ship `height` from the `display height` so all ships are aligned at the bottom of the screen
-    shape->setPosition(offset, display->height - height);
+    shape->setPosition(GLOBAL_MARGIN+ offset ,display->height - height-GLOBAL_MARGIN);
 
     return *this;
 };
@@ -51,7 +51,7 @@ BattleShip& BattleShip::setColor(sf::Color _color) {
     return *this;
 };
 BattleShip& BattleShip::setPos(sf::Vector2f pos) {
-    shape->setPosition(pos.x, pos.y);
+    shape->setPosition(pos.x +BATTLESHIP_PADDING,pos.y+BATTLESHIP_PADDING);
     return *this;
 };
 BattleShip& BattleShip::setCoords(sf::Vector2i _coords) {

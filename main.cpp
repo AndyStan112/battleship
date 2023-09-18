@@ -11,9 +11,11 @@ class GameTile {
 public:
     sf::RectangleShape* shape = new sf::RectangleShape(sf::Vector2f(GRID_CELL_SIZE, GRID_CELL_SIZE));
     sf::Vector2f pos;
-    GameTile(int i, int j, int offset, sf::Color color) {
-        pos.x = GRID_CELL_SIZE * i + offset;
-        pos.y = GRID_CELL_SIZE * j;
+    sf::Vector2i margin;
+    GameTile(int i, int j, int offset, sf::Color color, sf::Vector2i _margin) {
+        margin = _margin;
+        pos.x = GRID_CELL_SIZE * i + offset +margin.x;
+        pos.y = GRID_CELL_SIZE * j + margin.y;
         shape->setFillColor(color);
         shape->setOutlineThickness(GRID_CELL_THICKNESS);
         shape->setPosition(pos.x, pos.y);
@@ -31,8 +33,8 @@ public:
 
         for (int i = 0; i < TABLE_ROWS; i++) {
             for (int j = 0; j < TABLE_COLUMNS; j++) {
-                if(user == "user") grid[i][j] = new GameTile(i, j, 0, sf::Color::Cyan);
-                if(user == "enemy") grid[i][j] = new GameTile(i, j, display->width - GRID_CELL_SIZE * TABLE_COLUMNS, sf::Color::Black);
+                if(user == "user") grid[i][j] = new GameTile(i, j, 0, sf::Color::Cyan,sf::Vector2i(GLOBAL_MARGIN,GLOBAL_MARGIN));
+                if(user == "enemy") grid[i][j] = new GameTile(i, j, display->width - GRID_CELL_SIZE * TABLE_COLUMNS, sf::Color::Black,sf::Vector2i(-GLOBAL_MARGIN,GLOBAL_MARGIN));
             }
         }
     }
@@ -49,8 +51,10 @@ public:
      * @return `sf::Vector2i`- a pair of integers between [0, TABLE_ROWS) representing the row and column of the closest grid cell from the ship
     */
     sf::Vector2i getClosestGridCellCoordinates(sf::Vector2f coords, BattleShip* ship) {
-        int i = int(coords.x) / GRID_CELL_SIZE;
-        int j = int(coords.y) / GRID_CELL_SIZE;
+        int x = coords.x-GLOBAL_MARGIN;
+        int y = coords.y-GLOBAL_MARGIN;
+        int i = int(x) / GRID_CELL_SIZE;
+        int j = int(y) / GRID_CELL_SIZE;
 
         i = std::max(0, std::min(TABLE_ROWS - 1, i));
         j = std::max(0, std::min(TABLE_ROWS - 1, j));
