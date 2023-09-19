@@ -11,18 +11,26 @@
 
 int main()
 {
-
-    sf::TcpSocket socket;
-    sf::Socket::Status status = socket.connect("127.0.0.1", 53000);
+    // init tcp connection
+    std::cout << "starting client";
+    sf::TcpSocket server;
+    sf::Socket::Status status = server.connect("127.0.0.1", 53000);
     if (status != sf::Socket::Done)
     {
         std::cout << "client error";
     }
-    sf::Packet packet;
-    socket.receive(packet);
-    std::string test;
-    packet >> test;
-    std::cout << test;
+    sf::Packet clientPacket;
+    sf::Packet serverPacket;
+    int id = -1;
+    clientPacket << id;
+    if (server.send(clientPacket) == sf::Socket::Done && server.receive(serverPacket) == sf::Socket::Done)
+    {
+
+        serverPacket >> id;
+        std::cout << "client : " << id << '\n';
+    };
+
+    // std::cout << id;
 
     sf::Font font;
     if (!font.loadFromFile("fonts/FuturaBold.ttf"))
@@ -47,7 +55,7 @@ int main()
 
     Display *display = new Display(DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT);
 
-    sf::RenderWindow window(sf::VideoMode(display->width, display->height), "SFML works!");
+    sf::RenderWindow window(sf::VideoMode(display->width, display->height), id == 0 ? "primuk" : "doi");
     GameGrid userGrid = GameGrid("user", display);
     GameGrid enemyGrid = GameGrid("enemy", display);
 
