@@ -19,7 +19,7 @@ public:
     sf::RectangleShape *shape;
     sf::RectangleShape *phantom;
     int offset;
-    std::string direction = "vertical";
+    std::string direction;
     BattleShip(int _length, int _index, Display *_displayHeight);
     BattleShip &rotate();
     BattleShip &reset();

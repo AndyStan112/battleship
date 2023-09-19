@@ -5,6 +5,7 @@
 
 BattleShip &BattleShip::setDefaultState()
 {
+    direction = "vertical";
     color = BATTLESHIP_PLACED;
     coords = sf::Vector2i(0, 0);
     fixed = false;
