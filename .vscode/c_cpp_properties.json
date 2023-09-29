@@ -4,7 +4,6 @@
       "name": "Win32",
       "includePath": [
         "${default}",
-        "${workspaceFolder}/src/include",
         "${workspaceFolder}"
       ],
       "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
@@ -13,6 +12,24 @@
       "intelliSenseMode": "windows-gcc-x86",
       "configurationProvider": "ms-vscode.makefile-tools",
       "compilerPath": "C:/mingw32/bin/gcc.exe"
+    },
+
+    {
+      "name": "Linux",
+      "includePath": [
+        "${default}",
+        "${workspaceFolder}",
+        "/usr/include",
+        "/usr/include/x86_64-linux-gnu/c++/9",
+        "/usr/include/x86_64-linux-gnu/sys",
+        "/usr/share/doc/freetype2-doc",
+      ],
+      "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+      "cStandard": "c11",
+      "cppStandard": "gnu++14",
+      "intelliSenseMode": "linux-gcc-x64",
+      "configurationProvider": "ms-vscode.makefile-tools",
+      "compilerPath": "/usr/bin/g++"
     }
   ],
   "version": 4
