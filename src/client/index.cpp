@@ -5,179 +5,93 @@
 #include <string>
 #include <algorithm>
 #include "constants/constants.h"
-#include "grid/GameGrid.cpp"
-#include "battleship/BattleShip.cpp"
+#include "layout/utils/node.h"
 #include "display/display.cpp"
+#include "layout/engine.cpp"
+#include "shapes/RoundedRectangle.cpp"
 
 int main()
 {
-    // init tcp connection
-    std::cout << "starting client";
-    sf::TcpSocket server;
-    sf::Socket::Status status = server.connect("127.0.0.1", 53000);
-    if (status != sf::Socket::Done) {
-        std::cout << "client error";
-    }
-    
-    sf::Packet clientPacket;
-    sf::Packet serverPacket;
-    int id = -1;
-    clientPacket << id;
-    if (server.send(clientPacket) == sf::Socket::Done && server.receive(serverPacket) == sf::Socket::Done)
-    {
-
-        serverPacket >> id;
-        std::cout << "client : " << id << '\n';
-    };
-
-    sf::Font font;
-    if (!font.loadFromFile("./assets/fonts/FuturaBold.ttf"))
-        throw "Font missing! Please download Futura Bold Font!";
-
-    sf::Text text;
-    text.setPosition(100, 100);
-    text.setRotation(-90);
-    text.setFont(font);
-    text.setString("Hello world");
-    text.setCharacterSize(24);
-    text.setFillColor(sf::Color::White);
-
+    // sf::Font font;
+    // if (!font.loadFromFile("./assets/fonts/FuturaBold.ttf"))
+    //     throw "Font missing! Please download Futura Bold Font!";
 
     Display *display = new Display(DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT);
 
-    sf::RenderWindow window(sf::VideoMode(display->width, display->height), id == 0 ? "USER 1" : "USER 2");
-    
-    GameGrid userGrid = GameGrid("user", display);
-    GameGrid enemyGrid = GameGrid("enemy", display);
+    sf::RenderWindow window(sf::VideoMode(display->width, display->height), "BATTLESHIP 🛡️🚢");
 
-    std::array<BattleShip *, 7> userShips = {
-        new BattleShip(5, 0, display),
-        new BattleShip(4, 1, display),
-        new BattleShip(3, 2, display),
-        new BattleShip(2, 3, display),
-        new BattleShip(2, 4, display),
-        new BattleShip(1, 5, display),
-        new BattleShip(1, 6, display)};
-
-    BattleShip *selectedShip = NULL;
     while (window.isOpen())
     {
         sf::Event event;
-        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-        sf::Vector2f mouseCoords = window.mapPixelToCoords(mousePosition);
-
-        // handle all input events from user
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
+        while(window.pollEvent(event)) {
+            if(event.type == sf::Event::Closed)
                 window.close();
-
-            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
-            {
-                // if the user is allowed drop a ship
-                if (selectedShip)
-                {
-
-                    if (selectedShip->canDrop(userShips))
-                    {
-                        // make the cursor visible (exit "drag&drop" feel)
-                        window.setMouseCursorVisible(true);
-
-                        // if the ship is outside the board
-                        if (userGrid.isOutside(mouseCoords))
-                            // place the ship back in the "selection list"
-                            selectedShip->reset();
-                        else
-                        {
-                            selectedShip->setColor(BATTLESHIP_PLACED);
-                            auto test = userGrid.getClosestGridCellCoordinates(mouseCoords, selectedShip);
-                            std::cout << "i: " << test.x << "j:" << test.y << std::endl;
-                            std::cout << "x: " << mouseCoords.x << "y:" << mouseCoords.y << std::endl;
-                            userGrid.setPipCells(selectedShip, true);
-                        }
-
-                        selectedShip = NULL;
-                    }
-                }
-                // if the user clicked inside the window and doesn't hold a ship
-                else
-                    for (auto ship : userShips)
-                        // check if he is trying to grab a ship from the "selection list"
-                        if (ship->shape->getGlobalBounds().contains(mouseCoords))
-                        {
-                            // make the cursor invisible (create a "drag&drop" feel)
-                            window.setMouseCursorVisible(false);
-
-                            selectedShip = ship;
-                            userGrid.setPipCells(selectedShip, false);
-                            break;
-                        }
-            }
-
-            if (event.type == sf::Event::KeyPressed)
-            {
-                if (event.key.code == sf::Keyboard::R && selectedShip)
-                    selectedShip->rotate();
-                if (event.key.code == sf::Keyboard::Q)
-                    window.close();
-            }
-        }
-
-        if (selectedShip)
-        {
-
-            // if the user holds a ship, but is outside the board
-            if (userGrid.isOutside(mouseCoords))
-            {
-                // make the ship follow the cursor (disable the snapping feel) and change the color to red
-                selectedShip->setPos(mouseCoords).setCoords(sf::Vector2i(0, 0)).setColor(BATTLESHIP_IMPLACABLE);
-            }
-
-            // if the user holds a ship and is inside the board
-            else
-            {
-                auto snappedShipPosition = userGrid.getClosestGridCellPosition(mouseCoords, selectedShip);
-                auto snappedShipCoordinates = userGrid.getClosestGridCellCoordinates(mouseCoords, selectedShip);
-
-                // snap the ship to the closest grid cell
-                selectedShip->setPos(snappedShipPosition).setCoords(snappedShipCoordinates);
-
-                if (selectedShip->canDrop(userShips))
-                    selectedShip->setColor(BATTLESHIP_PLACABLE);
-                else
-                    selectedShip->setColor(BATTLESHIP_IMPLACABLE);
-            }
         }
 
         window.clear(sf::Color::White);
-        // draw
-        for (auto row : userGrid.grid)
-        {
-            for (auto tile : row)
-            {
-                window.draw(*tile->shape);
-                if (tile->showPip)
-                    window.draw(*tile->pip);
-            }
-        }
-        for (auto row : enemyGrid.grid)
-        {
-            for (auto tile : row)
-            {
-                window.draw(*tile->shape);
-            }
-        }
-        for (auto ship : userShips)
-        {
-            window.draw(*ship->phantom);
-            window.draw(*ship->shape);
-        }
 
-        // the last selected ships should be rendered above
-        if (selectedShip)
-            window.draw(*selectedShip->shape);
+        Node* E1 = new Node(), *E2 = new Node(), *E3 = new Node(), *E4 = new Node(), *E8 = new Node(), *E9 = new Node();
+        E1->shape = new sf::RectangleShape(sf::Vector2f(150, 150));
+        E1->margin.right = 10;
+        E1->margin.left = 10;
+        E1->margin.top = 10;
+        E1->name = "E1";
+        E1->shape->setFillColor(sf::Color::Blue);
+        
+        E2->shape = new sf::RectangleShape(sf::Vector2f(200, 150));
+        E2->margin.right = 10;
+        E2->margin.top = 10;
+        E2->shape->setFillColor(sf::Color::Green);
+        E2->name = "E2";
+        
+        E3->shape = new sf::RoundedRectangleShape(sf::Vector2f(150, 150), 15);
+        E3->margin.right = 10;
+        E3->margin.top = 10;
+        E3->shape->setFillColor(sf::Color::Magenta);
+        E3->name = "E3";
 
-        window.draw(text);
+        E4->shape = new sf::RoundedRectangleShape(sf::Vector2f(150, 150), 15);
+        E4->margin.right = 10;
+        E4->margin.top = 10;
+        E4->shape->setFillColor(sf::Color::Red);
+        E4->name = "E4";
+
+        E8->shape = new sf::RoundedRectangleShape(sf::Vector2f(150, 150), 15);
+        E8->margin.right = 10;
+        E8->margin.top = 10;
+        E8->shape->setFillColor(sf::Color::Green);
+        E8->name = "E8";
+
+        E9->shape = new sf::RoundedRectangleShape(sf::Vector2f(150, 150), 15);
+        E9->margin.right = 10;
+        E9->margin.top = 10;
+        E9->shape->setFillColor(sf::Color::Magenta);
+        E9->name = "E9";
+
+        Node *E5 = new Node(), *E6 = new Node(), *E7 = new Node();
+        E5->children = {E1, E2};
+        E5->margin.top = 20;
+        E5->margin.left = 50;
+        E5->padding.right = 50;
+        E5->padding.left = 50;
+        E5->shape->setFillColor(sf::Color::Yellow);
+        E5->name = "E5";
+        
+        E6->children = {E3, E4};
+        E6->shape->setFillColor(sf::Color::Cyan);
+        E6->name = "E6";
+        E6->margin.top = 20;
+
+        E7->children = {E8, E9};
+        E7->shape->setFillColor(sf::Color::Yellow);
+        E7->name = "E7";
+        E7->margin.top = 20;
+
+        Node *root = new Node();
+        root->children = {E5, E6, E7};
+        root->name = "root";
+
+        ComputeLayout(root, DEFAULT_DISPLAY_WIDTH, window);
 
         window.display();
     }

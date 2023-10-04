@@ -13,9 +13,9 @@ GameGrid::GameGrid(std::string _user, Display *display)
         for (int j = 0; j < TABLE_COLUMNS; j++)
         {
             if (user == "user")
-                grid[i][j] = new GameTile(i, j, 0, WATER, sf::Vector2i(GLOBAL_MARGIN, GLOBAL_MARGIN));
+                grid[i][j] = new GameTile(i, j, WATER);
             if (user == "enemy")
-                grid[i][j] = new GameTile(i, j, display->width - GRID_CELL_SIZE * TABLE_COLUMNS, FOG, sf::Vector2i(-GLOBAL_MARGIN, GLOBAL_MARGIN));
+                grid[i][j] = new GameTile(i, j, FOG);
         }
     }
 }
@@ -26,7 +26,7 @@ GameGrid::GameGrid(std::string _user, Display *display)
 sf::Vector2f GameGrid::getClosestGridCellPosition(sf::Vector2f coords, BattleShip *ship)
 {
     sf::Vector2i closestCoords = getClosestGridCellCoordinates(coords, ship);
-    return grid[closestCoords.x][closestCoords.y]->pos;
+    return grid[closestCoords.x][closestCoords.y]->shape->getPosition();
 }
 
 /**
@@ -34,7 +34,6 @@ sf::Vector2f GameGrid::getClosestGridCellPosition(sf::Vector2f coords, BattleShi
  */
 sf::Vector2i GameGrid::getClosestGridCellCoordinates(sf::Vector2f coords, BattleShip *ship)
 {
-    // - GLOBAL_MARGIN - 80
     int i = int(coords.x) / (GRID_CELL_SIZE + GRID_CELL_THICKNESS);
     int j = int(coords.y) / (GRID_CELL_SIZE + GRID_CELL_THICKNESS);
 
@@ -54,11 +53,15 @@ GameGrid &GameGrid::setPipCells(BattleShip *ship, bool show)
     int i = ship->coords.x;
     int j = ship->coords.y;
     if (ship->direction == "horizontal")
-        for (int k = 0; k < ship->length; k++)
-            grid[i + k][j]->setShowPip(show);
+        for (int k = 0; k < ship->length; k++) {
+            Pip* pip = grid[i + k][j]->children[0];
+            pip->showPip = true;
+        }
     else
-        for (int k = 0; k < ship->length; k++)
-            grid[i][j + k]->setShowPip(show);
+        for (int k = 0; k < ship->length; k++) {
+            Pip* pip = grid[i][j + k]->children[0];
+            pip->showPip = true;
+        }
 
     return *this;
 }

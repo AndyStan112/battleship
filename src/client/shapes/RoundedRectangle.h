@@ -6,7 +6,7 @@ namespace sf
     class RoundedRectangleShape : public sf::Shape
     {
         public:
-            explicit RoundedRectangleShape(const Vector2f& size = Vector2f(0, 0), float radius = 0, unsigned int cornerPointCount = 0);
+            explicit RoundedRectangleShape(const Vector2f& size = Vector2f(0, 0), float radius = 0, unsigned int cornerPointCount = 5);
             
             void setSize(const Vector2f& size);
             
