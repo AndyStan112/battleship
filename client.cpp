@@ -2,16 +2,44 @@
 #include <SFML/Network.hpp>
 #include <Array>
 #include <iostream>
+#include <ctime>
+#include <random>
+#include <sstream>
 #include <string>
 #include <algorithm>
 #include "constants.h"
 #include "GameGrid.cpp"
 #include "BattleShip.cpp"
 #include "display.cpp"
+std::string get_uuid()
+{
+    static std::mt19937 rng(std::time(nullptr));
+    std::uniform_int_distribution<int> dist(0, 15);
+
+    const char *v = "0123456789abcdef";
+    const bool dash[] = {0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0};
+
+    std::string res;
+    for (int i = 0; i < 16; i++)
+    {
+        if (dash[i])
+            res += "-";
+        res += v[dist(rng)];
+        res += v[dist(rng)];
+    }
+    return res;
+};
+class User
+{
+public:
+    std::string id = get_uuid();
+    std::string name = "Guest";
+};
 
 int main()
 {
     // init tcp connection
+    User *user = new User(), *enemy = new User();
     std::cout << "starting client";
     sf::TcpSocket server;
     sf::Socket::Status status = server.connect("127.0.0.1", 53000);
@@ -21,13 +49,10 @@ int main()
     }
     sf::Packet clientPacket;
     sf::Packet serverPacket;
-    int id = -1;
-    clientPacket << id;
+    clientPacket << "create" << user->id;
     if (server.send(clientPacket) == sf::Socket::Done && server.receive(serverPacket) == sf::Socket::Done)
     {
-
-        serverPacket >> id;
-        std::cout << "client : " << id << '\n';
+        serverPacket >> user->id;
     };
 
     // std::cout << id;
@@ -55,7 +80,7 @@ int main()
 
     Display *display = new Display(DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT);
 
-    sf::RenderWindow window(sf::VideoMode(display->width, display->height), id == 0 ? "primuk" : "doi");
+    sf::RenderWindow window(sf::VideoMode(display->width, display->height), "test");
     GameGrid userGrid = GameGrid("user", display);
     GameGrid enemyGrid = GameGrid("enemy", display);
 

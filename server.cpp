@@ -2,13 +2,19 @@
 #include <iostream>
 #include <SFML/Network.hpp>
 #include <Array>
+#include "constants.h"
 
 int main()
 {
+    class Room
+    {
+        int id;
+    };
     std::vector<sf::TcpSocket *> clients;
     std::vector<std::pair<sf::TcpSocket, sf::TcpSocket>> games;
     sf::TcpListener listener;
     int highestId = 0;
+
     // bind the listener to a port
     if (listener.listen(53000) != sf::Socket::Done)
     {
@@ -55,16 +61,22 @@ int main()
                         std::string message = "test";
                         if (client->receive(clientPacket) == sf::Socket::Done)
                         {
-                            int id;
+                            std::string action;
+                            clientPacket >> action;
+                            std::string id;
                             clientPacket >> id;
-                            std::cout << "server got a client";
-                            if (id == -1)
-                            {
-                                serverPacket << highestId++;
-                                client->send(serverPacket);
-                            }
-                            else
-                                std::cout << "not";
+                            std::cout << "server got a client\n";
+                            std::cout << "server : " << action << '\n';
+                            std::cout << "server : " << id << '\n';
+                            serverPacket << "test";
+                            client->send(serverPacket);
+                            // if (id == -1)
+                            // {
+                            //     serverPacket << highestId++;
+                            //     client->send(serverPacket);
+                            // }
+                            // else
+                            //     std::cout << "not";
                         }
                     }
                 }
