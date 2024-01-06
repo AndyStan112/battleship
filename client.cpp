@@ -11,24 +11,7 @@
 #include "GameGrid.cpp"
 #include "BattleShip.cpp"
 #include "display.cpp"
-std::string get_uuid()
-{
-    static std::mt19937 rng(std::time(nullptr));
-    std::uniform_int_distribution<int> dist(0, 15);
-
-    const char *v = "0123456789abcdef";
-    const bool dash[] = {0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0};
-
-    std::string res;
-    for (int i = 0; i < 16; i++)
-    {
-        if (dash[i])
-            res += "-";
-        res += v[dist(rng)];
-        res += v[dist(rng)];
-    }
-    return res;
-};
+#include "util.cpp"
 class User
 {
 public:
@@ -40,7 +23,7 @@ int main()
 {
     // init tcp connection
     User *user = new User(), *enemy = new User();
-    std::cout << "starting client";
+    std::cout << "starting client" << user->id << '\n';
     sf::TcpSocket server;
     sf::Socket::Status status = server.connect("127.0.0.1", 53000);
     if (status != sf::Socket::Done)
@@ -52,7 +35,16 @@ int main()
     clientPacket << "create" << user->id;
     if (server.send(clientPacket) == sf::Socket::Done && server.receive(serverPacket) == sf::Socket::Done)
     {
-        serverPacket >> user->id;
+        std::string status, response;
+        serverPacket >> status >> response;
+        if (status == "ok")
+        {
+            std::cout << "ok" << response << '\n';
+        }
+        else
+        {
+            std::cout << "fail" << response << '\n';
+        }
     };
 
     // std::cout << id;

@@ -3,13 +3,40 @@
 #include <SFML/Network.hpp>
 #include <Array>
 #include "constants.h"
-
+#include "util.cpp"
 int main()
 {
+
+    class User
+    {
+    public:
+        std::string id;
+        TileState userGrid[10][10];
+        User(std::string id)
+        {
+            this->id = id;
+        }
+        void setGrid(TileState grid[10][10])
+        {
+            for (int i = 0; i < 10; i++)
+                for (int j = 0; j < 10; j++)
+                    userGrid[i][j] = grid[i][j];
+        }
+    };
+
     class Room
     {
-        int id;
+    public:
+        std::string code = get_uuid().substr(0, 6);
+        User *host;
+        User *enemy;
+        Room(std::string id)
+        {
+            this->host = new User(id);
+        }
+        // void setEnemy(id)
     };
+    std::vector<Room *> rooms;
     std::vector<sf::TcpSocket *> clients;
     std::vector<std::pair<sf::TcpSocket, sf::TcpSocket>> games;
     sf::TcpListener listener;
@@ -66,17 +93,21 @@ int main()
                             std::string id;
                             clientPacket >> id;
                             std::cout << "server got a client\n";
-                            std::cout << "server : " << action << '\n';
-                            std::cout << "server : " << id << '\n';
-                            serverPacket << "test";
+                            std::cout << "server : " << action << "  " << id << '\n';
+                            if (action == "create")
+                            {
+                                auto newRoom = new Room(id);
+                                rooms.push_back(newRoom);
+                                std::cout << "room : " << rooms[0]->code << '\n';
+                                serverPacket << "ok"
+                                             << "wait";
+                            }
+                            else
+                            {
+                                serverPacket << "fail"
+                                             << "unknown request";
+                            }
                             client->send(serverPacket);
-                            // if (id == -1)
-                            // {
-                            //     serverPacket << highestId++;
-                            //     client->send(serverPacket);
-                            // }
-                            // else
-                            //     std::cout << "not";
                         }
                     }
                 }
