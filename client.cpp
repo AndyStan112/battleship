@@ -42,8 +42,6 @@ int main()
 
     text.setPosition(100, 100);
 
-    text.setRotation(-90);
-
     text.setFont(font); // font is a sf::Font
 
     // set the string to display
@@ -74,6 +72,8 @@ int main()
     sf::Event event;
     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
     sf::Vector2f mouseCoords = window.mapPixelToCoords(mousePosition);
+    sf::String playerInput = "";
+    sf::Text codeText;
     while (state != QUIT && window.isOpen())
     {
         switch (state)
@@ -255,7 +255,7 @@ int main()
 
                 if (event.type == sf::Event::KeyPressed)
                 {
-                    if (event.key.code == sf::Keyboard::M)
+                    if (event.key.code == sf::Keyboard::Escape)
                         state = MAIN;
                 }
             }
@@ -263,6 +263,73 @@ int main()
             window.clear(sf::Color::White);
             text.setFillColor(sf::Color::Black);
             text.setString("hosting");
+            window.draw(text);
+            break;
+        case JOIN:
+
+            window.clear(sf::Color::White);
+            while (window.pollEvent(event))
+            {
+
+                if (event.type == sf::Event::TextEntered)
+                {
+
+                    if (event.key.code != 8 && event.key.code != sf::Keyboard::Enter && playerInput.getSize() < 6)
+                    {
+                        playerInput += static_cast<char>(event.text.unicode);
+                    }
+                    if (event.key.code == 8 && playerInput.getSize() > 0)
+                    {
+                        playerInput.erase(playerInput.getSize() - 1, 1);
+                    }
+                    codeText.setString(playerInput);
+                }
+
+                if (event.type == sf::Event::Closed)
+                    window.close();
+
+                if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+                {
+                    // add buttons here
+                }
+
+                if (event.type == sf::Event::KeyPressed)
+                {
+                    if (event.key.code == sf::Keyboard::Enter)
+                    {
+                        if (playerInput.getSize() == 6)
+                        {
+                            ONCE
+                            {
+                                clientPacket << "join" << user->id << playerInput.toAnsiString();
+                                if (server.send(clientPacket) == sf::Socket::Done && server.receive(serverPacket) == sf::Socket::Done)
+                                {
+                                    std::string status, response;
+                                    serverPacket >> status >> response;
+                                    std::cout << "response: " << response << '\n';
+                                    if (status == "ok")
+                                    {
+                                        std::cout << "ok" << response << '\n';
+                                    }
+                                    else
+                                    {
+                                        std::cout << "fail" << response << '\n';
+                                    }
+                                };
+                            }
+                        }
+                    }
+                    if (event.key.code == sf::Keyboard::Escape)
+                        state = MAIN;
+                }
+            }
+            codeText.setPosition(200, 200);
+            codeText.setCharacterSize(24);
+            codeText.setFont(font);
+            codeText.setFillColor(sf::Color::Black);
+            window.draw(codeText);
+            text.setFillColor(sf::Color::Black);
+            text.setString("joining");
             window.draw(text);
         }
         window.display();

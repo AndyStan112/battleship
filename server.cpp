@@ -102,6 +102,14 @@ int main()
                                 serverPacket << "ok"
                                              << "wait";
                             }
+                            else if (action == "join")
+                            {
+                                std::string code;
+                                clientPacket >> code;
+                                std::cout << "CLient code : " << code << '\n';
+                                serverPacket << "ok"
+                                             << "wait";
+                            }
                             else
                             {
                                 serverPacket << "fail"
