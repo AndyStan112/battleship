@@ -31,3 +31,13 @@ enum TileState
     WATER_TILE,
     SHIP
 };
+enum GameState
+{
+    MAIN,
+    HOST,
+    PLACING,
+    JOIN,
+    TURN,
+    QUIT,
+    WAITING,
+};

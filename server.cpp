@@ -98,7 +98,7 @@ int main()
                             {
                                 auto newRoom = new Room(id);
                                 rooms.push_back(newRoom);
-                                std::cout << "room : " << rooms[0]->code << '\n';
+                                std::cout << "room : " << newRoom->code << '\n';
                                 serverPacket << "ok"
                                              << "wait";
                             }

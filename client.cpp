@@ -12,6 +12,7 @@
 #include "BattleShip.cpp"
 #include "display.cpp"
 #include "util.cpp"
+#define ONCE for (static bool first = false; first == false; first = true)
 class User
 {
 public:
@@ -32,22 +33,6 @@ int main()
     }
     sf::Packet clientPacket;
     sf::Packet serverPacket;
-    clientPacket << "create" << user->id;
-    if (server.send(clientPacket) == sf::Socket::Done && server.receive(serverPacket) == sf::Socket::Done)
-    {
-        std::string status, response;
-        serverPacket >> status >> response;
-        if (status == "ok")
-        {
-            std::cout << "ok" << response << '\n';
-        }
-        else
-        {
-            std::cout << "fail" << response << '\n';
-        }
-    };
-
-    // std::cout << id;
 
     sf::Font font;
     if (!font.loadFromFile("fonts/FuturaBold.ttf"))
@@ -75,6 +60,8 @@ int main()
     sf::RenderWindow window(sf::VideoMode(display->width, display->height), "test");
     GameGrid userGrid = GameGrid("user", display);
     GameGrid enemyGrid = GameGrid("enemy", display);
+    BattleShip *selectedShip = NULL;
+    GameState state = MAIN;
 
     std::array<BattleShip *, 7> userShips = {
         new BattleShip(5, 0, display),
@@ -84,129 +71,201 @@ int main()
         new BattleShip(2, 4, display),
         new BattleShip(1, 5, display),
         new BattleShip(1, 6, display)};
-
-    BattleShip *selectedShip = NULL;
-    while (window.isOpen())
+    sf::Event event;
+    sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+    sf::Vector2f mouseCoords = window.mapPixelToCoords(mousePosition);
+    while (state != QUIT && window.isOpen())
     {
-        sf::Event event;
-        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-        sf::Vector2f mouseCoords = window.mapPixelToCoords(mousePosition);
-
-        // handle all input events from user
-        while (window.pollEvent(event))
+        switch (state)
         {
-            if (event.type == sf::Event::Closed)
-                window.close();
+        case PLACING:
 
-            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+            window.clear(sf::Color::White);
+            // handle all input events from user
+            while (window.pollEvent(event))
             {
-                // if the user is allowed drop a ship
-                if (selectedShip)
+                if (event.type == sf::Event::Closed)
+                    window.close();
+
+                if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
                 {
+                    // if the user is allowed drop a ship
+                    if (selectedShip)
+                    {
+
+                        if (selectedShip->canDrop(userShips))
+                        {
+                            // make the cursor visible (exit "drag&drop" feel)
+                            window.setMouseCursorVisible(true);
+
+                            // if the ship is outside the board
+                            if (userGrid.isOutside(mouseCoords))
+                                // place the ship back in the "selection list"
+                                selectedShip->reset();
+                            else
+                            {
+                                selectedShip->setColor(BATTLESHIP_PLACED);
+                                auto test = userGrid.getClosestGridCellCoordinates(mouseCoords, selectedShip);
+                                std::cout << "i: " << test.x << "j:" << test.y << std::endl;
+                                std::cout << "x: " << mouseCoords.x << "y:" << mouseCoords.y << std::endl;
+                                userGrid.setPipCells(selectedShip, true);
+                            }
+
+                            selectedShip = NULL;
+                        }
+                    }
+                    // if the user clicked inside the window and doesn't hold a ship
+                    else
+                        for (auto ship : userShips)
+                            // check if he is trying to grab a ship from the "selection list"
+                            if (ship->shape->getGlobalBounds().contains(mouseCoords))
+                            {
+                                // make the cursor invisible (create a "drag&drop" feel)
+                                window.setMouseCursorVisible(false);
+
+                                selectedShip = ship;
+                                userGrid.setPipCells(selectedShip, false);
+                                break;
+                            }
+                }
+
+                if (event.type == sf::Event::KeyPressed)
+                {
+                    if (event.key.code == sf::Keyboard::R && selectedShip)
+                        selectedShip->rotate();
+                    if (event.key.code == sf::Keyboard::Q)
+                        window.close();
+                }
+            }
+
+            if (selectedShip)
+            {
+
+                // if the user holds a ship, but is outside the board
+                if (userGrid.isOutside(mouseCoords))
+                {
+                    // make the ship follow the cursor (disable the snapping feel) and change the color to red
+                    selectedShip->setPos(mouseCoords).setCoords(sf::Vector2i(0, 0)).setColor(BATTLESHIP_IMPLACABLE);
+                }
+
+                // if the user holds a ship and is inside the board
+                else
+                {
+                    auto snappedShipPosition = userGrid.getClosestGridCellPosition(mouseCoords, selectedShip);
+                    auto snappedShipCoordinates = userGrid.getClosestGridCellCoordinates(mouseCoords, selectedShip);
+
+                    // snap the ship to the closest grid cell
+                    selectedShip->setPos(snappedShipPosition).setCoords(snappedShipCoordinates);
 
                     if (selectedShip->canDrop(userShips))
-                    {
-                        // make the cursor visible (exit "drag&drop" feel)
-                        window.setMouseCursorVisible(true);
-
-                        // if the ship is outside the board
-                        if (userGrid.isOutside(mouseCoords))
-                            // place the ship back in the "selection list"
-                            selectedShip->reset();
-                        else
-                        {
-                            selectedShip->setColor(BATTLESHIP_PLACED);
-                            auto test = userGrid.getClosestGridCellCoordinates(mouseCoords, selectedShip);
-                            std::cout << "i: " << test.x << "j:" << test.y << std::endl;
-                            std::cout << "x: " << mouseCoords.x << "y:" << mouseCoords.y << std::endl;
-                            userGrid.setPipCells(selectedShip, true);
-                        }
-
-                        selectedShip = NULL;
-                    }
+                        selectedShip->setColor(BATTLESHIP_PLACABLE);
+                    else
+                        selectedShip->setColor(BATTLESHIP_IMPLACABLE);
                 }
-                // if the user clicked inside the window and doesn't hold a ship
-                else
-                    for (auto ship : userShips)
-                        // check if he is trying to grab a ship from the "selection list"
-                        if (ship->shape->getGlobalBounds().contains(mouseCoords))
-                        {
-                            // make the cursor invisible (create a "drag&drop" feel)
-                            window.setMouseCursorVisible(false);
-
-                            selectedShip = ship;
-                            userGrid.setPipCells(selectedShip, false);
-                            break;
-                        }
             }
 
-            if (event.type == sf::Event::KeyPressed)
+            // draw
+            for (auto row : userGrid.grid)
             {
-                if (event.key.code == sf::Keyboard::R && selectedShip)
-                    selectedShip->rotate();
-                if (event.key.code == sf::Keyboard::Q)
+                for (auto tile : row)
+                {
+                    window.draw(*tile->shape);
+                    if (tile->showPip)
+                        window.draw(*tile->pip);
+                }
+            }
+            for (auto row : enemyGrid.grid)
+            {
+                for (auto tile : row)
+                {
+                    window.draw(*tile->shape);
+                }
+            }
+            for (auto ship : userShips)
+            {
+                window.draw(*ship->phantom);
+                window.draw(*ship->shape);
+            }
+
+            // the last selected ships should be rendered above
+            if (selectedShip)
+                window.draw(*selectedShip->shape);
+
+            window.draw(text);
+
+            break;
+        case MAIN:
+
+            while (window.pollEvent(event))
+            {
+                if (event.type == sf::Event::Closed)
                     window.close();
+
+                if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+                {
+                    // add buttons here
+                }
+
+                if (event.type == sf::Event::KeyPressed)
+                {
+                    if (event.key.code == sf::Keyboard::H)
+                    {
+                        state = HOST;
+                    }
+                    if (event.key.code == sf::Keyboard::J)
+                        state = JOIN;
+                }
             }
-        }
 
-        if (selectedShip)
-        {
+            window.clear(sf::Color::White);
+            text.setFillColor(sf::Color::Black);
+            text.setString("main");
+            window.draw(text);
 
-            // if the user holds a ship, but is outside the board
-            if (userGrid.isOutside(mouseCoords))
+            break;
+        case HOST:
+            // trick to not execute multiple times
+            ONCE
             {
-                // make the ship follow the cursor (disable the snapping feel) and change the color to red
-                selectedShip->setPos(mouseCoords).setCoords(sf::Vector2i(0, 0)).setColor(BATTLESHIP_IMPLACABLE);
+                clientPacket << "create" << user->id;
+                if (server.send(clientPacket) == sf::Socket::Done && server.receive(serverPacket) == sf::Socket::Done)
+                {
+                    std::string status, response;
+                    serverPacket >> status >> response;
+                    if (status == "ok")
+                    {
+                        std::cout << "ok" << response << '\n';
+                    }
+                    else
+                    {
+                        std::cout << "fail" << response << '\n';
+                    }
+                };
             }
 
-            // if the user holds a ship and is inside the board
-            else
+            while (window.pollEvent(event))
             {
-                auto snappedShipPosition = userGrid.getClosestGridCellPosition(mouseCoords, selectedShip);
-                auto snappedShipCoordinates = userGrid.getClosestGridCellCoordinates(mouseCoords, selectedShip);
+                if (event.type == sf::Event::Closed)
+                    window.close();
 
-                // snap the ship to the closest grid cell
-                selectedShip->setPos(snappedShipPosition).setCoords(snappedShipCoordinates);
+                if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+                {
+                    // add buttons here
+                }
 
-                if (selectedShip->canDrop(userShips))
-                    selectedShip->setColor(BATTLESHIP_PLACABLE);
-                else
-                    selectedShip->setColor(BATTLESHIP_IMPLACABLE);
+                if (event.type == sf::Event::KeyPressed)
+                {
+                    if (event.key.code == sf::Keyboard::M)
+                        state = MAIN;
+                }
             }
-        }
 
-        window.clear(sf::Color::White);
-        // draw
-        for (auto row : userGrid.grid)
-        {
-            for (auto tile : row)
-            {
-                window.draw(*tile->shape);
-                if (tile->showPip)
-                    window.draw(*tile->pip);
-            }
+            window.clear(sf::Color::White);
+            text.setFillColor(sf::Color::Black);
+            text.setString("hosting");
+            window.draw(text);
         }
-        for (auto row : enemyGrid.grid)
-        {
-            for (auto tile : row)
-            {
-                window.draw(*tile->shape);
-            }
-        }
-        for (auto ship : userShips)
-        {
-            window.draw(*ship->phantom);
-            window.draw(*ship->shape);
-        }
-
-        // the last selected ships should be rendered above
-        if (selectedShip)
-            window.draw(*selectedShip->shape);
-
-        window.draw(text);
-
         window.display();
     }
-
     return 0;
 }
