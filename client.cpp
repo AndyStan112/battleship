@@ -266,7 +266,8 @@ int main()
             window.draw(text);
             break;
         case JOIN:
-
+            bool drawError;
+            sf::String errorMessage;
             window.clear(sf::Color::White);
             while (window.pollEvent(event))
             {
@@ -313,6 +314,9 @@ int main()
                                     }
                                     else
                                     {
+                                        first = true;
+                                        drawError = true;
+                                        errorMessage = response;
                                         std::cout << "fail" << response << '\n';
                                     }
                                 };
